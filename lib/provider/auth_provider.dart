@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
 final googleSignInProvider = Provider((ref) => GoogleSignIn());
@@ -14,31 +15,33 @@ class AuthController extends StateNotifier<User?> {
   final Ref ref;
   AuthController(this.ref) : super(null);
 
-  Future<void> signInWithGoogle(BuildContext context) async {
-    try {
-      final googleUser = await ref.read(googleSignInProvider).signIn();
-      if (googleUser == null) {
-        _showSnackBar(context, "Google sign-in cancelled");
-        return;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential =
-          await ref.read(firebaseAuthProvider).signInWithCredential(credential);
-
-      state = userCredential.user;
-
-      _showSnackBar(context, "Signed in as ${state?.displayName ?? 'User'} 🎉");
-    } catch (e) {
-      _showSnackBar(context, "Sign-in failed: ${e.toString()}");
+ Future<void> signInWithGoogle(BuildContext context) async {
+  try {
+    final googleUser = await ref.read(googleSignInProvider).signIn();
+    if (googleUser == null) {
+      _showSnackBar(context, "Google sign-in cancelled");
+      return;
     }
-  }
 
+    final googleAuth = await googleUser.authentication;
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    final userCredential =
+        await ref.read(firebaseAuthProvider).signInWithCredential(credential);
+
+    state = userCredential.user;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_name', state?.displayName ?? 'User');
+
+    _showSnackBar(context, "Signed in as ${state?.displayName ?? 'User'} 🎉");
+  } catch (e) {
+    _showSnackBar(context, "Sign-in failed: ${e.toString()}");
+  }
+}
   Future<void> signOut(BuildContext context) async {
     try {
       await ref.read(firebaseAuthProvider).signOut();
