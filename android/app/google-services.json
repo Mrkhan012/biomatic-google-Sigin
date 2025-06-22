@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "932560741113",
+    "project_id": "fir-6f3fd",
+    "storage_bucket": "fir-6f3fd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:932560741113:android:ef20434a0445f617a1f828",
+        "android_client_info": {
+          "package_name": "com.example.sigi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUwRYJR8YJajVL8vN-JvWX2ym5x7Qvr08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
