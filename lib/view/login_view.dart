@@ -51,7 +51,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    vm.isAuthenticated || user != null ? "Welcome!" : "Secure Login",
+                    vm.isAuthenticated || user != null
+                        ? "Welcome!"
+                        : "Secure Login",
                     style: GoogleFonts.poppins(
                       fontSize: 28,
                       fontWeight: FontWeight.w600,
@@ -63,8 +65,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     vm.isAuthenticated
                         ? "You're successfully logged in."
                         : user != null
-                            ? "Signed in as ${user.displayName}"
-                            : "Use fingerprint, PIN or Google to login",
+                        ? "Signed in as ${user.displayName}"
+                        : "Use fingerprint, PIN or Google to login",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       color: Colors.grey.shade700,
@@ -74,7 +76,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 40),
 
                   // Biometric Authentication
-                  if (!vm.isAuthenticated && !vm.showPasswordFallback) ...[
+                  // Biometric Authentication
+                  if (!vm.isAuthenticated &&
+                      !vm.showPasswordFallback &&
+                      user == null) ...[
                     InkWell(
                       onTap: () => vmNotifier.authenticate(
                         allowDeviceFallback: true,
@@ -99,8 +104,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 24),
                   ],
 
-                  // Google Sign-In Button
-                  if (user == null) ...[
+                  // Google Sign-In Button (only show if not authenticated by biometric or Google)
+                  if (!vm.isAuthenticated && user == null) ...[
                     ElevatedButton.icon(
                       icon: const Icon(Icons.login, color: Colors.white),
                       label: const Text("Sign in with Google"),
@@ -125,15 +130,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               setState(() => rememberMe = value!),
                           activeColor: Colors.deepPurple,
                         ),
-                        Text(
-                          "Remember me",
-                          style: GoogleFonts.poppins(),
-                        ),
+                        Text("Remember me", style: GoogleFonts.poppins()),
                       ],
                     ),
                   ],
 
-                  // PIN Fallback
                   if (vm.showPasswordFallback && !vm.isAuthenticated) ...[
                     TextField(
                       obscureText: true,
@@ -153,27 +154,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: const Text('Login'),
                     ),
                   ],
-                 SizedBox(height: 8,),
-                  if (!vm.isAuthenticated && !vm.showPasswordFallback) ...[
-                    Align(
-                      alignment: Alignment.center,
-                      child: TextButton(
-                        onPressed: vmNotifier.showPinFallback,
-                        child: Text(
-                          'Use PIN instead',
-                          style: GoogleFonts.poppins(
-                            color: Colors.grey.shade700,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  SizedBox(height: 8),
+                  // if (!vm.isAuthenticated && !vm.showPasswordFallback) ...[
+                  //   Align(
+                  //     alignment: Alignment.center,
+                  //     child: TextButton(
+                  //       onPressed: vmNotifier.showPinFallback,
+                  //       child: Text(
+                  //         'Use PIN instead',
+                  //         style: GoogleFonts.poppins(
+                  //           color: Colors.grey.shade700,
+                  //           decoration: TextDecoration.underline,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ],
 
                   // Logout (if logged in via biometrics or Google)
                   if (vm.isAuthenticated || user != null) ...[
                     const SizedBox(height: 40),
-                    const Icon(Icons.check_circle, color: Colors.green, size: 80),
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 80,
+                    ),
                     const SizedBox(height: 20),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.logout),
@@ -181,7 +186,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: () async {
                         final prefs = await SharedPreferences.getInstance();
                         await prefs.remove('remember_me');
-                        await ref.read(loginViewModelProvider.notifier).logout();
+                        await ref
+                            .read(loginViewModelProvider.notifier)
+                            .logout();
                         await ref.read(authProvider.notifier).signOut(context);
                       },
                     ),
